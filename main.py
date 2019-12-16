@@ -9,7 +9,7 @@ class UnknownPythonVersionError(Exception):
     pass
 
 
-class UnknownPath(Exception):
+class UnknownPathError(Exception):
     pass
 
 
@@ -93,6 +93,6 @@ if __name__ == '__main__':
         if sys.argv[1] in os.listdir(os.path.curdir):
             main(sys.argv[1])
         else:
-            raise UnknownPath(f'Unknown path: {sys.argv[1]}')
+            raise UnknownPathError(f'Unknown path: {sys.argv[1]}')
     else:
         print('Usage:\n  python main.py <dir>')
