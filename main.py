@@ -9,10 +9,6 @@ class UnknownPythonVersionError(Exception):
     pass
 
 
-class UnknownPathError(Exception):
-    pass
-
-
 class Parser:
     def __init__(self, project_path: str):
         self.project_path = project_path
@@ -90,9 +86,6 @@ def main(project_dir: str):
 
 if __name__ == '__main__':
     if len(sys.argv) == 2:
-        if sys.argv[1] in os.listdir(os.path.curdir):
-            main(sys.argv[1])
-        else:
-            raise UnknownPathError(f'Unknown path: {sys.argv[1]}')
+        main(sys.argv[1])
     else:
         print('Usage:\n  python main.py <dir>')
