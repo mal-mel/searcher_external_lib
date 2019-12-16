@@ -5,6 +5,14 @@ import distutils.sysconfig as sysconfig
 import subprocess
 
 
+class UnknownPythonVersionError(Exception):
+    pass
+
+
+class UnknownPath(Exception):
+    pass
+
+
 class Parser:
     def __init__(self, project_path: str):
         self.project_path = project_path
@@ -48,10 +56,6 @@ class PythonLibsSearcher:
                     self.standard_libs.append(os.path.join(top, nm)[len(std_lib) + 1:-3].replace(os.sep, '.'))
 
 
-class UnknownPythonVersionError(Exception):
-    pass
-
-
 class LibsInstaller:
     def __init__(self, std_libs: list, project_libs: dict, python_version: int):
         self.std_libs, self.project_libs = std_libs, project_libs
@@ -85,4 +89,10 @@ def main(project_dir: str):
 
 
 if __name__ == '__main__':
-    main('test_project')
+    if len(sys.argv) == 2:
+        if sys.argv[1] in os.listdir(os.path.curdir):
+            main(sys.argv[1])
+        else:
+            raise UnknownPath(f'Unknown path: {sys.argv[1]}')
+    else:
+        print('Usage:\n  python main.py <dir>')
