@@ -10,7 +10,7 @@ class Parser:
         self.project_path = project_path
         self.py_files = []
         self.parse_py_files(self.project_path)
-        self.py_files_imports = []
+        self.py_files_imports = {}
         self.find_all_imports()
 
     def parse_py_files(self, path: str):
@@ -25,11 +25,13 @@ class Parser:
 
     def find_all_imports(self):
         for filename in self.py_files:
+            if filename not in self.py_files_imports:
+                self.py_files_imports[filename] = []
             with open(filename) as file:
                 for line in file.read().split('\n'):
                     regex_data = re.search(r'^(?:from (\S*)|import (\S*))', line)
                     if regex_data:
-                        self.py_files_imports.append(regex_data.group(1) or regex_data.group(2))
+                        self.py_files_imports[filename].append(regex_data.group(1) or regex_data.group(2))
 
 
 class PythonLibsSearcher:
@@ -51,16 +53,18 @@ class UnknownPythonVersionError(Exception):
 
 
 class LibsInstaller:
-    def __init__(self, std_libs: list, project_libs: list, python_version: int):
+    def __init__(self, std_libs: list, project_libs: dict, python_version: int):
         self.std_libs, self.project_libs = std_libs, project_libs
         self.python_version = python_version
         self.check_is_lib_in_std()
 
     def check_is_lib_in_std(self):
-        for lib in self.project_libs:
-            if lib not in self.std_libs:
-                print(f'Find uninstall lib: {lib}')
-                self.lib_installer(lib)
+        for key in self.project_libs:
+            for lib in self.project_libs[key]:
+                if lib not in self.std_libs:
+                    if lib not in [x.split('/')[-1].strip('.py') for x in self.project_libs.keys()]:
+                        print(f'Find uninstall lib: {lib}')
+                        self.lib_installer(lib)
 
     def lib_installer(self, lib: str):
         if self.python_version in [2, 3]:
@@ -75,7 +79,8 @@ class LibsInstaller:
 
 def main(project_dir: str):
     python_lib_searcher_obj = PythonLibsSearcher()
-    LibsInstaller(python_lib_searcher_obj.standard_libs, Parser(project_dir).py_files_imports, python_lib_searcher_obj.python_version)
+    parser_obj = Parser(project_dir)
+    LibsInstaller(python_lib_searcher_obj.standard_libs, parser_obj.py_files_imports, python_lib_searcher_obj.python_version)
 
 
 if __name__ == '__main__':
