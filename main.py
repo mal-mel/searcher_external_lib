@@ -59,10 +59,11 @@ class LibsInstaller:
         self.check_is_lib_in_std()
 
     def check_is_lib_in_std(self):
+        project_modules_names = [x.split('/')[-1].strip('.py') for x in self.project_libs.keys()]
         for key in self.project_libs:
             for lib in self.project_libs[key]:
                 if lib not in self.std_libs:
-                    if lib not in [x.split('/')[-1].strip('.py') for x in self.project_libs.keys()]:
+                    if lib not in project_modules_names:
                         print(f'Find uninstall lib: {lib}')
                         self.lib_installer(lib)
 
